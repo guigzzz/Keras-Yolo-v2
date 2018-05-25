@@ -23,6 +23,12 @@ class TinyYOLOv2:
 
         self.has_weights = True
 
+    def loadWeightsFromKeras(self, file_path):
+        self.sess.run(tf.global_variables_initializer())
+        self.m.load_weights(file_path)
+
+        self.has_weights = True
+
     def buildModel(self):
         m = Sequential()
         m.add(Conv2D(16, (3, 3), padding='same', input_shape=(self.image_size, self.image_size, 3)))
