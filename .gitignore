@@ -1,0 +1,5 @@
+INRIAPerson
+.vscode
+yolov2-tiny-voc.weights
+*.pyc
+*-checkpoint.*
