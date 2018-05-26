@@ -28,7 +28,6 @@ CELL_SIZE = 32
 def getBoundingBoxesFromNetOutput(output, image_size, confidence_threshold):
 
     NUM_CELLS = image_size // CELL_SIZE
-    print(image_size)
     
     cell_coords = np.array([
         (i, j)

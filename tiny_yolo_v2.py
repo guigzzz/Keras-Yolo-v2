@@ -56,18 +56,23 @@ class TinyYOLOv2:
         
         return m
 
-    def forward(self, image):
-        if len(image.shape) == 3:
-            image = image[None]
-
+    def forward(self, images):
         if not self.has_weights:
             raise ValueError("Network needs to be initialised before being executed")
 
-        output = self.sess.run(self.m.output, {self.m.input: image}).reshape(-1, self.image_size // 32, self.image_size // 32, 5, 25)
+        if len(images.shape) == 3:
+            # single image
+            images = images[None]
+        
+        output = self.sess.run(self.m.output, {self.m.input: images}).reshape(-1, self.image_size // 32, self.image_size // 32, 5, 25)
 
-        out = getClassInterestConf(output, 14) # people class
-        boxes = getBoundingBoxesFromNetOutput(out, self.image_size, confidence_threshold=0.3)
-        return non_max_suppression(boxes, 0.3)
+        allboxes = []
+        for o in output:
+            out = getClassInterestConf(o, 14) # people class
+            boxes = getBoundingBoxesFromNetOutput(out, self.image_size, confidence_threshold=0.3)
+            allboxes.append(non_max_suppression(boxes, 0.3))
+
+        return allboxes
 
 
 
