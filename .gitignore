@@ -3,3 +3,4 @@ INRIAPerson
 yolov2-tiny-voc.weights
 *.pyc
 *-checkpoint.*
+set*
