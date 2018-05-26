@@ -1,6 +1,8 @@
 
 import numpy as np
 
+# https://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
+
 def non_max_suppression(boxes, overlapThresh):
     # if there are no boxes, return an empty list
     if len(boxes) == 0:
