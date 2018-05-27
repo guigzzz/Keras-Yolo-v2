@@ -60,8 +60,9 @@ def getBoundingBoxesFromNetOutput(output, image_size, confidence_threshold):
     top = by - bh / 2
     bottom = by + bh / 2
 
+
     boxes = np.stack((
-        left, bottom, right, top
+        left, top, right, bottom
     ), axis=-1).astype(np.int32)
 
     boxes = boxes[final_confidence > confidence_threshold].reshape(-1, 4)
