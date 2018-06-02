@@ -25,30 +25,21 @@ TINY_YOLOV2_ANCHOR_PRIORS = np.array([
 ])
 CELL_SIZE = 32
 
-def getBoundingBoxesFromNetOutput(output, image_size, confidence_threshold):
-
+def getBoundingBoxesFromNetOutput(clf, image_size, confidence_threshold):
     NUM_CELLS = image_size // CELL_SIZE
-    
-    cell_coords = np.array([
-        (i, j)
-        for i in range(NUM_CELLS)
-        for j in range(NUM_CELLS)
-    ])
+    cell_inds = np.arange(NUM_CELLS)
 
-    clf = output.reshape(NUM_CELLS ** 2, 5, 6)
-
-    tx = clf[:, :, 0]
-    ty = clf[:, :, 1]
-    tw = clf[:, :, 2]
-    th = clf[:, :, 3]
-    to = clf[:, :, 4]
-    class_confidences = clf[:, :, 5]
+    tx = clf[..., 0]
+    ty = clf[..., 1]
+    tw = clf[..., 2]
+    th = clf[..., 3]
+    to = clf[..., 4]
+    class_confidences = clf[..., 5]
 
     pw, ph = TINY_YOLOV2_ANCHOR_PRIORS[:, 0], TINY_YOLOV2_ANCHOR_PRIORS[:, 1]
-    cy, cx = cell_coords[:, 0], cell_coords[:, 1]
 
-    bx = (logistic(tx) + cx[..., None]) * CELL_SIZE
-    by = (logistic(ty) + cy[..., None]) * CELL_SIZE
+    bx = (logistic(tx) + cell_inds[None, :, None]) * CELL_SIZE
+    by = (logistic(ty) + cell_inds[:, None, None]) * CELL_SIZE
     bw = (pw * np.exp(tw)) * CELL_SIZE
     bh = (ph * np.exp(th)) * CELL_SIZE
     object_confidences = logistic(to)
@@ -59,7 +50,6 @@ def getBoundingBoxesFromNetOutput(output, image_size, confidence_threshold):
     right = bx + bw / 2
     top = by - bh / 2
     bottom = by + bh / 2
-
 
     boxes = np.stack((
         left, top, right, bottom
