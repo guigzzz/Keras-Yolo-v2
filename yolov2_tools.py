@@ -23,6 +23,7 @@ def getClassInterestConf(yolov2_out, class_of_interest):
 TINY_YOLOV2_ANCHOR_PRIORS = np.array([
     [1.08, 1.19], [3.42, 4.41], [6.63, 11.38], [9.42, 5.11], [16.62, 10.52]
 ])
+pw, ph = TINY_YOLOV2_ANCHOR_PRIORS[:, 0], TINY_YOLOV2_ANCHOR_PRIORS[:, 1]
 CELL_SIZE = 32
 
 def getBoundingBoxesFromNetOutput(clf, image_size, confidence_threshold):
@@ -36,15 +37,11 @@ def getBoundingBoxesFromNetOutput(clf, image_size, confidence_threshold):
     to = clf[..., 4]
     class_confidences = clf[..., 5]
 
-    pw, ph = TINY_YOLOV2_ANCHOR_PRIORS[:, 0], TINY_YOLOV2_ANCHOR_PRIORS[:, 1]
-
     bx = (logistic(tx) + cell_inds[None, :, None]) * CELL_SIZE
     by = (logistic(ty) + cell_inds[:, None, None]) * CELL_SIZE
     bw = (pw * np.exp(tw)) * CELL_SIZE
     bh = (ph * np.exp(th)) * CELL_SIZE
     object_confidences = logistic(to)
-
-    final_confidence = class_confidences * object_confidences
 
     left = bx - bw / 2
     right = bx + bw / 2
@@ -54,7 +51,8 @@ def getBoundingBoxesFromNetOutput(clf, image_size, confidence_threshold):
     boxes = np.stack((
         left, top, right, bottom
     ), axis=-1).astype(np.int32)
-
+    
+    final_confidence = class_confidences * object_confidences
     boxes = boxes[final_confidence > confidence_threshold].reshape(-1, 4)
 
     return boxes
