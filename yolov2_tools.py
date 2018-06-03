@@ -26,9 +26,8 @@ TINY_YOLOV2_ANCHOR_PRIORS = np.array([
 pw, ph = TINY_YOLOV2_ANCHOR_PRIORS[:, 0], TINY_YOLOV2_ANCHOR_PRIORS[:, 1]
 CELL_SIZE = 32
 
-def getBoundingBoxesFromNetOutput(clf, image_size, confidence_threshold):
-    NUM_CELLS = image_size // CELL_SIZE
-    cell_inds = np.arange(NUM_CELLS)
+def getBoundingBoxesFromNetOutput(clf, confidence_threshold):
+    cell_inds = np.arange(clf.shape[1])
 
     tx = clf[..., 0]
     ty = clf[..., 1]
@@ -37,23 +36,23 @@ def getBoundingBoxesFromNetOutput(clf, image_size, confidence_threshold):
     to = clf[..., 4]
     class_confidences = clf[..., 5]
 
-    bx = (logistic(tx) + cell_inds[None, :, None]) * CELL_SIZE
-    by = (logistic(ty) + cell_inds[:, None, None]) * CELL_SIZE
-    bw = (pw * np.exp(tw)) * CELL_SIZE
-    bh = (ph * np.exp(th)) * CELL_SIZE
+    bx = logistic(tx) + cell_inds[None, :, None]
+    by = logistic(ty) + cell_inds[:, None, None]
+    bw = pw * np.exp(tw) / 2
+    bh = ph * np.exp(th) / 2
     object_confidences = logistic(to)
 
-    left = bx - bw / 2
-    right = bx + bw / 2
-    top = by - bh / 2
-    bottom = by + bh / 2
+    left = bx - bw
+    right = bx + bw
+    top = by - bh
+    bottom = by + bh
 
     boxes = np.stack((
         left, top, right, bottom
-    ), axis=-1).astype(np.int32)
+    ), axis=-1) * CELL_SIZE
     
     final_confidence = class_confidences * object_confidences
-    boxes = boxes[final_confidence > confidence_threshold].reshape(-1, 4)
+    boxes = boxes[final_confidence > confidence_threshold].reshape(-1, 4).astype(np.int32)
 
     return boxes
 

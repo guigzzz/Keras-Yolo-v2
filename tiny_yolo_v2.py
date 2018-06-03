@@ -69,7 +69,7 @@ class TinyYOLOv2:
         allboxes = []
         for o in output:
             out = getClassInterestConf(o, 14) # people class
-            boxes = getBoundingBoxesFromNetOutput(out, self.image_size, confidence_threshold=0.3)
+            boxes = getBoundingBoxesFromNetOutput(out, confidence_threshold=0.3)
             allboxes.append(non_max_suppression(boxes, 0.3))
 
         return allboxes
