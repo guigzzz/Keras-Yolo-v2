@@ -10,8 +10,8 @@ def non_max_suppression(boxes, overlapThresh):
 
     # if the bounding boxes integers, convert them to floats --
     # this is important since we'll be doing a bunch of divisions
-    if boxes.dtype.kind == "i":
-        boxes = boxes.astype("float")
+    # if boxes.dtype.kind == "i":
+        # boxes = boxes.astype("float")
  
     # initialize the list of picked indexes	
     pick = []
@@ -32,29 +32,27 @@ def non_max_suppression(boxes, overlapThresh):
     while len(idxs) > 0:
         # grab the last index in the indexes list and add the
         # index value to the list of picked indexes
-        last = len(idxs) - 1
-        i = idxs[last]
+        i = idxs[-1]
         pick.append(i)
  
         # find the largest (x, y) coordinates for the start of
         # the bounding box and the smallest (x, y) coordinates
         # for the end of the bounding box
-        xx1 = np.maximum(x1[i], x1[idxs[:last]])
-        yy1 = np.maximum(y1[i], y1[idxs[:last]])
-        xx2 = np.minimum(x2[i], x2[idxs[:last]])
-        yy2 = np.minimum(y2[i], y2[idxs[:last]])
+        xx1 = np.maximum(x1[i], x1[idxs[:-1]])
+        yy1 = np.maximum(y1[i], y1[idxs[:-1]])
+        xx2 = np.minimum(x2[i], x2[idxs[:-1]])
+        yy2 = np.minimum(y2[i], y2[idxs[:-1]])
  
         # compute the width and height of the bounding box
         w = np.maximum(0, xx2 - xx1 + 1)
         h = np.maximum(0, yy2 - yy1 + 1)
  
         # compute the ratio of overlap
-        overlap = (w * h) / area[idxs[:last]]
+        overlap = (w * h) / area[idxs[:-1]]
  
         # delete all indexes from the index list that have
-        idxs = np.delete(idxs, np.concatenate(([last],
-            np.where(overlap > overlapThresh)[0])))
+        idxs = (idxs[:-1])[overlap < overlapThresh]
  
     # return only the bounding boxes that were picked using the
     # integer data type
-    return boxes[pick].astype("int")
+    return boxes[pick]

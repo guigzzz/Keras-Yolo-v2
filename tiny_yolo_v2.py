@@ -63,8 +63,9 @@ class TinyYOLOv2:
         if len(images.shape) == 3:
             # single image
             images = images[None]
-        
-        output = self.sess.run(self.m.output, {self.m.input: images}).reshape(-1, self.image_size // 32, self.image_size // 32, 5, 25)
+
+        output = self.m.predict(images).reshape(
+            -1, self.image_size // 32, self.image_size // 32, 5, 25)
 
         allboxes = []
         for o in output:
