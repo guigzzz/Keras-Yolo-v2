@@ -8,6 +8,7 @@ from darknet_weight_loader import load_weights
 import tensorflow as tf
 from classifcation_utils import non_max_suppression
 from yolov2_tools import getClassInterestConf, getBoundingBoxesFromNetOutput
+import numpy as np
 
 # 6 x (conv - bn - leakyrelu - maxpool) + 2 * (conv - bn - leakyrelu)
 # layer_indices = [0, 4, 8, 12, 16, 20, 24, 27]
@@ -16,6 +17,10 @@ def conv_batch_lrelu(input_tensor, numfilter, dim):
     input_tensor = Conv2D(numfilter, (dim, dim), padding='same')(input_tensor)
     input_tensor = BatchNormalization()(input_tensor)
     return LeakyReLU(alpha=0.1)(input_tensor)
+
+TINY_YOLOV2_ANCHOR_PRIORS = np.array([
+    1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52
+]).reshape(5, 2)
 
 class TinyYOLOv2:
     def __init__(self, image_size):
@@ -66,7 +71,7 @@ class TinyYOLOv2:
         allboxes = []
         for o in output:
             out = getClassInterestConf(o, 14) # people class
-            boxes = getBoundingBoxesFromNetOutput(out, confidence_threshold=0.3)
+            boxes = getBoundingBoxesFromNetOutput(out, TINY_YOLOV2_ANCHOR_PRIORS, confidence_threshold=0.3)
             allboxes.append(non_max_suppression(boxes, 0.3))
 
         return allboxes

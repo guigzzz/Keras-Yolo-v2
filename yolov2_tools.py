@@ -26,7 +26,8 @@ TINY_YOLOV2_ANCHOR_PRIORS = np.array([
 pw, ph = TINY_YOLOV2_ANCHOR_PRIORS[:, 0], TINY_YOLOV2_ANCHOR_PRIORS[:, 1]
 CELL_SIZE = 32
 
-def getBoundingBoxesFromNetOutput(clf, confidence_threshold):
+def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
+    pw, ph = anchors[:, 0], anchors[:, 1]
     cell_inds = np.arange(clf.shape[1])
 
     tx = clf[..., 0]

@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Conv2D, BatchNormalization, LeakyReLU, MaxPooling2D, Input, Concatenate
+from keras.layers import Permute, Reshape
 from keras import backend as K
 from keras import Model
 
@@ -8,8 +9,8 @@ from darknet_weight_loader import load_weights
 import tensorflow as tf
 from classifcation_utils import non_max_suppression
 from yolov2_tools import getClassInterestConf, getBoundingBoxesFromNetOutput
+import numpy as np
 
-from keras.layers import Permute, Reshape
 def reorg(input_tensor, stride):
     # K.get_variable_shape
     _, h, w, c = input_tensor.get_shape().as_list() 
@@ -32,6 +33,11 @@ def NetworkInNetwork(input_tensor, dims):
     for d in dims:
         input_tensor = conv_batch_lrelu(input_tensor, *d)
     return input_tensor
+
+import numpy as np
+YOLOV2_ANCHOR_PRIORS = np.array([
+    1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071
+]).reshape(5, 2)
 
 class YOLOv2:
     def __init__(self, image_size):
@@ -104,7 +110,7 @@ class YOLOv2:
         allboxes = []
         for o in output:
             out = getClassInterestConf(o, 14) # people class
-            boxes = getBoundingBoxesFromNetOutput(out, confidence_threshold=0.3)
+            boxes = getBoundingBoxesFromNetOutput(out, YOLOV2_ANCHOR_PRIORS, confidence_threshold=0.3)
             allboxes.append(non_max_suppression(boxes, 0.3))
 
         return allboxes

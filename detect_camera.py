@@ -1,13 +1,18 @@
 import cv2
 from tiny_yolo_v2 import TinyYOLOv2
+from yolo_v2 import YOLOv2
 from scipy.misc import imresize
 from time import time
 import numpy as np
 
 IM_SIZE = 288 #416
 
-net = TinyYOLOv2(IM_SIZE)
-net.loadWeightsFromKeras('yolov2_tiny_keras_model')
+# net = TinyYOLOv2(IM_SIZE)
+# net.loadWeightsFromKeras('yolov2_tiny_keras_model')
+
+net = YOLOv2(IM_SIZE)
+net.loadWeightsFromKeras('yolov2_keras_model')
+
 webcam = cv2.VideoCapture(0)
 webcam.read()
 
