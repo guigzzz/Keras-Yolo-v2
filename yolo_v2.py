@@ -1,22 +1,16 @@
-from keras.models import Sequential
-from keras.layers import Conv2D, BatchNormalization, LeakyReLU, MaxPooling2D, Input, Concatenate
-
+from keras.layers import Conv2D, MaxPooling2D, Input, Concatenate
 from keras import backend as K
 from keras import Model
+import numpy as np
 
 from darknet_weight_loader import load_weights
-
-import tensorflow as tf
 from classifcation_utils import non_max_suppression
 from yolov2_tools import getClassInterestConf, getBoundingBoxesFromNetOutput
-import numpy as np
-import numpy as np
+from yolo_utils import conv_batch_lrelu, NetworkInNetwork, reorg
+
 YOLOV2_ANCHOR_PRIORS = np.array([
     1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071
 ]).reshape(5, 2)
-
-
-from yolo_utils import conv_batch_lrelu, NetworkInNetwork, reorg
 
 class YOLOv2:
     def __init__(self, image_size):

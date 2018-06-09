@@ -1,14 +1,11 @@
-from keras.models import Sequential
-from keras.layers import Conv2D, BatchNormalization, LeakyReLU, MaxPooling2D, InputLayer, Input
+from keras.layers import Conv2D, MaxPooling2D, Input
 from keras import backend as K
 from keras import Model
+import numpy as np
 
 from darknet_weight_loader import load_weights
-
-import tensorflow as tf
 from classifcation_utils import non_max_suppression
 from yolov2_tools import getClassInterestConf, getBoundingBoxesFromNetOutput
-import numpy as np
 from yolo_utils import conv_batch_lrelu
 
 TINY_YOLOV2_ANCHOR_PRIORS = np.array([

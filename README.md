@@ -1,5 +1,5 @@
 # Keras-Yolo-v2
-Keras re-implementation of Yolo v2.
+A very basic re-implementation of Yolo v2 in Keras
 Both normal and tiny backbone models can be used.
 
 ### Links to necessary weight files:
