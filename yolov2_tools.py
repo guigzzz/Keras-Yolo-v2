@@ -20,10 +20,6 @@ def getClassInterestConf(yolov2_out, class_of_interest):
 
     return out
 
-TINY_YOLOV2_ANCHOR_PRIORS = np.array([
-    [1.08, 1.19], [3.42, 4.41], [6.63, 11.38], [9.42, 5.11], [16.62, 10.52]
-])
-pw, ph = TINY_YOLOV2_ANCHOR_PRIORS[:, 0], TINY_YOLOV2_ANCHOR_PRIORS[:, 1]
 CELL_SIZE = 32
 
 def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
