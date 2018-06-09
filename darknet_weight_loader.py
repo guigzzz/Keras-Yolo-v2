@@ -55,23 +55,55 @@ def load_conv_weights(layer, data, index, use_bias):
     
     return index
 
+
+def getLayerInfo(layer):
+    splits = layer.name.split('_')
+    layer_index = int(splits[-1])
+    layer_type = '_'.join(splits[:-1])
+
+    return layer_type, layer_index
+
 def load_weights(model, yolo_weight_file):
+
+    with open(yolo_weight_file, 'rb') as f:
+        weights_header = np.ndarray(
+            shape=(4, ), dtype='int32', buffer=f.read(16))
+
+    """
+    *** the following works but feels like a massive hack ***
+    The tiny yolo weight file only needs an offset of 4, the weights start after
+
+    The normal yolo weight file seems to need an offset of 5. If an offset of 4 is used then there
+    is a single left over weight at the end.
+
+    The weight header for tiny yolo is 0, 1, 0, [some number]
+    while the weight header for yolo is 0, 2, 0, [some number]
+    hence we can get the correct offset for both by substracting one from the second number
+    and adding that as an offset.
+    """
+    index = 4 + weights_header[1] - 1
+
     print('Loading weights from {}'.format(yolo_weight_file))
     data = np.fromfile(yolo_weight_file, np.float32)
-    
-    # first four values of data aren't used
-    index = 4 
-    
-    # 6 x (conv - bn - leakyrelu - maxpool) + 2 * (conv - bn - leakyrelu)
-    layer_indices = list(range(0, 6*4, 4)) + list(range(6*4, 6*4+2*3, 3))
-    
-    for i in layer_indices:
+
+    layer_dict = {}
+    for l in model.layers[:-1]:
+        ltype, ind = getLayerInfo(l)
+        
+        if ind in layer_dict:
+            layer_dict[ind][ltype] = l
+        
+        else:
+            layer_dict[ind] = {ltype: l}
+
+
+    for i in sorted(layer_dict.keys()):
         # retrieve bn layer weights
-        index = load_bn_weights(model.layers[i+1], data, index)
+        index = load_bn_weights(layer_dict[i]['batch_normalization'], data, index)
         
         # retrieve conv layer weights
-        index = load_conv_weights(model.layers[i], data, index, use_bias=False)
-        
+        index = load_conv_weights(layer_dict[i]['conv2d'], data, index, use_bias=False)
+
     # Final layer has no batchnorm, hence need to restore bias weights as well
     index = load_conv_weights(model.layers[-1], data, index, use_bias=True)
 
