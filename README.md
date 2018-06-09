@@ -6,7 +6,7 @@ Both normal and tiny backbone models can be used.
 - [Tiny Yolo v2](https://pjreddie.com/media/files/yolov2-tiny-voc.weights)
 - [Yolo v2](https://pjreddie.com/media/files/yolov2-voc.weights)
 
-Note: that the implementations are tuned to perform person detection (however this can be easily changed, given that the models are trained on VOC).
+Note: the implementations are tuned to perform person detection (however this can be easily changed, given that the models are trained on VOC).
 
 ## Usage
 
@@ -40,7 +40,7 @@ from tiny_yolo_v2 import TinyYOLOv2
 
 IM_SIZE = 13*32
 net = TinyTOLOv2(IM_SIZE)
-net.loadWeightsFromKeras(yiny_yolo_keras_weight_file)
+net.loadWeightsFromKeras(tiny_yolo_keras_weight_file)
 ```
 
 ## Example:
@@ -50,3 +50,5 @@ net.loadWeightsFromKeras(yiny_yolo_keras_weight_file)
 
 #### Detections:
 ![alt text](images/example_detection.JPG)
+
+(As we can see, the INRIA dataset annotations are pretty. The model does detect unannotated objects)
