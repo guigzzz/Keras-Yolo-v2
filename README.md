@@ -51,4 +51,4 @@ net.loadWeightsFromKeras(tiny_yolo_keras_weight_file)
 #### Detections:
 ![alt text](images/example_detection.JPG)
 
-(As we can see, the INRIA dataset annotations are pretty. The model does detect unannotated objects)
+(As we can see, the INRIA dataset annotations are pretty bad. In this case, the model detects an unannotated object)
