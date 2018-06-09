@@ -1,5 +1,5 @@
 # Keras-Yolo-v2
-Keras re-implementation of Yolo v2
+Keras re-implementation of Yolo v2.
 Both normal and tiny backbone models can be used.
 
 ### Links to necessary weight files:
@@ -16,7 +16,7 @@ from tiny_yolo_v2 import TinyYOLOv2
 # or from yolo_v2 import YOLOv2
 
 IM_SIZE = 13*32
-net = TinyTOLOv2(IM_SIZE)
+net = TinyYOLOv2(IM_SIZE)
 net.loadWeightsFromDarknet(tiny_yolo_darknet_weight_file)
 ```
 ### Inference:
@@ -39,7 +39,7 @@ from tiny_yolo_v2 import TinyYOLOv2
 # or from yolo_v2 import YOLOv2
 
 IM_SIZE = 13*32
-net = TinyTOLOv2(IM_SIZE)
+net = TinyYOLOv2(IM_SIZE)
 net.loadWeightsFromKeras(tiny_yolo_keras_weight_file)
 ```
 
