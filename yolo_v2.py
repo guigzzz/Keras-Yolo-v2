@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Conv2D, BatchNormalization, LeakyReLU, MaxPooling2D, Input, Concatenate
-from keras.layers import Permute, Reshape
+
 from keras import backend as K
 from keras import Model
 
@@ -10,34 +10,13 @@ import tensorflow as tf
 from classifcation_utils import non_max_suppression
 from yolov2_tools import getClassInterestConf, getBoundingBoxesFromNetOutput
 import numpy as np
-
-def reorg(input_tensor, stride):
-    # K.get_variable_shape
-    _, h, w, c = input_tensor.get_shape().as_list() 
-
-    channel_first = Permute((3, 1, 2))(input_tensor)
-    
-    reshape_tensor = Reshape((c // (stride ** 2), h, stride, w, stride))(channel_first)
-    permute_tensor = Permute((3, 5, 1, 2, 4))(reshape_tensor)
-    target_tensor = Reshape((-1, h // stride, w // stride))(permute_tensor)
-    
-    channel_last = Permute((2, 3, 1))(target_tensor)
-    return Reshape((h // stride, w // stride, -1))(channel_last)
-
-def conv_batch_lrelu(input_tensor, numfilter, dim):
-    input_tensor = Conv2D(numfilter, (dim, dim), padding='same')(input_tensor)
-    input_tensor = BatchNormalization()(input_tensor)
-    return LeakyReLU(alpha=0.1)(input_tensor)
-
-def NetworkInNetwork(input_tensor, dims):
-    for d in dims:
-        input_tensor = conv_batch_lrelu(input_tensor, *d)
-    return input_tensor
-
 import numpy as np
 YOLOV2_ANCHOR_PRIORS = np.array([
     1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071
 ]).reshape(5, 2)
+
+
+from yolo_utils import conv_batch_lrelu, NetworkInNetwork, reorg
 
 class YOLOv2:
     def __init__(self, image_size):
