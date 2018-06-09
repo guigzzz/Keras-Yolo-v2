@@ -3,7 +3,7 @@ import numpy as np
 
 # https://www.pyimagesearch.com/2015/02/16/faster-non-maximum-suppression-python/
 
-def non_max_suppression(boxes, overlapThresh):
+def non_max_suppression(boxes, labels, overlapThresh):
     # if there are no boxes, return an empty list
     if len(boxes) == 0:
         return []
@@ -55,4 +55,4 @@ def non_max_suppression(boxes, overlapThresh):
  
     # return only the bounding boxes that were picked using the
     # integer data type
-    return boxes[pick]
+    return boxes[pick], labels[pick]

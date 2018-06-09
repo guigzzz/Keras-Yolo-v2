@@ -5,7 +5,7 @@ import numpy as np
 
 from darknet_weight_loader import load_weights
 from classifcation_utils import non_max_suppression
-from yolov2_tools import getClassInterestConf, getBoundingBoxesFromNetOutput
+from yolov2_tools import getBoundingBoxesFromNetOutput
 from yolo_utils import conv_batch_lrelu, NetworkInNetwork, reorg
 
 YOLOV2_ANCHOR_PRIORS = np.array([
@@ -82,9 +82,8 @@ class YOLOv2:
 
         allboxes = []
         for o in output:
-            out = getClassInterestConf(o, 14) # people class
-            boxes = getBoundingBoxesFromNetOutput(out, YOLOV2_ANCHOR_PRIORS, confidence_threshold=0.3)
-            allboxes.append(non_max_suppression(boxes, 0.3))
+            boxes, labels = getBoundingBoxesFromNetOutput(o, YOLOV2_ANCHOR_PRIORS, confidence_threshold=0.3)
+            allboxes.append(non_max_suppression(boxes, labels, 0.3))
 
         return allboxes
 

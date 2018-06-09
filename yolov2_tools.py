@@ -1,24 +1,11 @@
 import numpy as np
 
-
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
 def softmax(x):
     exp_out = np.exp(x - np.max(x, axis=-1)[..., None])
     return exp_out / np.sum(exp_out, axis=-1)[..., None]
-
-def getClassInterestConf(yolov2_out, class_of_interest):
-    class_logits = yolov2_out[..., 5:]
-    class_preds = softmax(class_logits)
-
-    logits_of_interest = class_preds[..., class_of_interest]
-
-    out = np.concatenate((
-        yolov2_out[..., :5], logits_of_interest[..., None]
-    ), axis=-1)
-
-    return out
 
 CELL_SIZE = 32
 
@@ -31,7 +18,10 @@ def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
     tw = clf[..., 2]
     th = clf[..., 3]
     to = clf[..., 4]
-    class_confidences = clf[..., 5]
+
+    sftmx = softmax(clf[..., 5:])
+    predicted_labels = np.argmax(sftmx, axis=-1)
+    class_confidences = np.max(sftmx, axis=-1)
 
     bx = logistic(tx) + cell_inds[None, :, None]
     by = logistic(ty) + cell_inds[:, None, None]
@@ -50,6 +40,6 @@ def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
     
     final_confidence = class_confidences * object_confidences
     boxes = boxes[final_confidence > confidence_threshold].reshape(-1, 4).astype(np.int32)
-
-    return boxes
+    labels = predicted_labels[final_confidence > confidence_threshold]
+    return boxes, labels
 

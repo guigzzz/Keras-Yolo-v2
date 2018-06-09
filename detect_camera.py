@@ -5,7 +5,7 @@ from scipy.misc import imresize
 from time import time
 import numpy as np
 
-IM_SIZE = 288 #416
+IM_SIZE = 416
 
 # net = TinyYOLOv2(IM_SIZE)
 # net.loadWeightsFromKeras('yolov2_tiny_keras_model')
@@ -26,9 +26,10 @@ while True:
         
         ok, frame = webcam.read()
         frame = imresize(frame, (IM_SIZE, IM_SIZE)) / 255
-        boxes = net.forward(frame)[0]
+        r = net.forward(frame)[0]
 
-        if len(boxes) > 0:
+        if len(r) > 0:
+            boxes, _ = r
             for left, top, right, bottom in boxes:
                 cv2.rectangle(frame, (left, top), (right, bottom), color=(255, 0, 0), thickness=3)
 
