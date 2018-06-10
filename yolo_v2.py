@@ -4,8 +4,7 @@ from keras import Model
 import numpy as np
 
 from darknet_weight_loader import load_weights
-from classifcation_utils import non_max_suppression
-from yolov2_tools import getBoundingBoxesFromNetOutput
+from yolov2_tools import yoloPostProcess
 from yolo_utils import conv_batch_lrelu, NetworkInNetwork, reorg
 
 YOLOV2_ANCHOR_PRIORS = np.array([
@@ -65,9 +64,7 @@ class YOLOv2:
         model = conv_batch_lrelu(model, 1024, 3)
         model_out = Conv2D(125, (1, 1), padding='same', activation='linear')(model)
 
-        m = Model(inputs=model_in, outputs=model_out)
-        
-        return m
+        return Model(inputs=model_in, outputs=model_out)
 
     def forward(self, images):
         if not self.has_weights:
@@ -80,12 +77,7 @@ class YOLOv2:
         output = self.m.predict(images).reshape(
             -1, self.image_size // 32, self.image_size // 32, 5, 25)
 
-        allboxes = []
-        for o in output:
-            boxes, labels = getBoundingBoxesFromNetOutput(o, YOLOV2_ANCHOR_PRIORS, confidence_threshold=0.3)
-            allboxes.append(non_max_suppression(boxes, labels, 0.3))
-
-        return allboxes
+        return yoloPostProcess(output, YOLOV2_ANCHOR_PRIORS)
 
 
 

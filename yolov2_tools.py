@@ -1,4 +1,5 @@
 import numpy as np
+from classifcation_utils import non_max_suppression
 
 def logistic(x):
     return 1 / (1 + np.exp(-x))
@@ -43,3 +44,10 @@ def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
     labels = predicted_labels[final_confidence > confidence_threshold]
     return boxes, labels
 
+def yoloPostProcess(yolo_output, priors, maxsuppression=True, maxsuppressionthresh=0.5, classthresh=0.6):
+    allboxes = []
+    for o in yolo_output:
+        boxes, labels = getBoundingBoxesFromNetOutput(o, priors, confidence_threshold=classthresh)
+        allboxes.append(non_max_suppression(boxes, labels, maxsuppressionthresh))
+
+    return allboxes

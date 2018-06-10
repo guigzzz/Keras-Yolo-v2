@@ -4,8 +4,7 @@ from keras import Model
 import numpy as np
 
 from darknet_weight_loader import load_weights
-from classifcation_utils import non_max_suppression
-from yolov2_tools import getBoundingBoxesFromNetOutput
+from yolov2_tools import yoloPostProcess
 from yolo_utils import conv_batch_lrelu
 
 TINY_YOLOV2_ANCHOR_PRIORS = np.array([
@@ -58,14 +57,5 @@ class TinyYOLOv2:
         output = self.m.predict(images).reshape(
             -1, self.image_size // 32, self.image_size // 32, 5, 25)
 
-        allboxes = []
-        for o in output:
-            boxes, labels = getBoundingBoxesFromNetOutput(o, TINY_YOLOV2_ANCHOR_PRIORS, confidence_threshold=0.3)
-            allboxes.append(non_max_suppression(boxes, labels, 0.3))
-
-        return allboxes
-
-
-
-
+        return yoloPostProcess(output, TINY_YOLOV2_ANCHOR_PRIORS)
     
