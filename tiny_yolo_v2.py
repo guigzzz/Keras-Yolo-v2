@@ -4,8 +4,8 @@ from keras import Model
 import numpy as np
 
 from darknet_weight_loader import load_weights
-from yolov2_tools import yoloPostProcess
-from yolo_utils import conv_batch_lrelu
+from postprocessing import yoloPostProcess
+from yolo_layer_utils import conv_batch_lrelu
 
 TINY_YOLOV2_ANCHOR_PRIORS = np.array([
     1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52
