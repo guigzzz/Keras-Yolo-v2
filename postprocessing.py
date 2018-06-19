@@ -97,6 +97,8 @@ def yoloPostProcess(yolo_output, priors, maxsuppression=True, maxsuppressionthre
     allboxes = []
     for o in yolo_output:
         boxes, labels = getBoundingBoxesFromNetOutput(o, priors, confidence_threshold=classthresh)
-        allboxes.append(non_max_suppression(boxes, labels, maxsuppressionthresh))
+        if maxsuppression and len(boxes) > 0:
+            boxes, labels = non_max_suppression(boxes, labels, maxsuppressionthresh)
+        allboxes.append((boxes, labels))
 
     return allboxes

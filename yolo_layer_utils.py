@@ -1,6 +1,6 @@
 from keras.layers import Permute, Reshape
 from keras.layers import Conv2D, BatchNormalization, LeakyReLU
-
+from keras import regularizers, initializers
 
 def reorg(input_tensor, stride):
     _, h, w, c = input_tensor.get_shape().as_list() 
@@ -15,7 +15,10 @@ def reorg(input_tensor, stride):
     return Reshape((h // stride, w // stride, -1))(channel_last)
 
 def conv_batch_lrelu(input_tensor, numfilter, dim):
-    input_tensor = Conv2D(numfilter, (dim, dim), padding='same')(input_tensor)
+    input_tensor = Conv2D(numfilter, (dim, dim), padding='same',
+                        kernel_regularizer=regularizers.l2(0.0005),
+                        kernel_initializer=initializers.TruncatedNormal(stddev=0.1)
+                    )(input_tensor)
     input_tensor = BatchNormalization()(input_tensor)
     return LeakyReLU(alpha=0.1)(input_tensor)
 

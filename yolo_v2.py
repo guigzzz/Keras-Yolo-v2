@@ -12,22 +12,18 @@ YOLOV2_ANCHOR_PRIORS = np.array([
 ]).reshape(5, 2)
 
 class YOLOv2:
-    def __init__(self, image_size):
-        K.set_learning_phase(0)
+    def __init__(self, image_size, is_learning_phase=False):
+        K.set_learning_phase(int(is_learning_phase))
         K.reset_uids()
 
         self.image_size = image_size
-
         self.m = self.buildModel()
-        self.has_weights = False
 
     def loadWeightsFromDarknet(self, file_path):
         load_weights(self.m, file_path)
-        self.has_weights = True
 
     def loadWeightsFromKeras(self, file_path):
         self.m.load_weights(file_path)
-        self.has_weights = True
 
     def buildModel(self):
         model_in = Input((self.image_size, self.image_size, 3))
@@ -67,9 +63,6 @@ class YOLOv2:
         return Model(inputs=model_in, outputs=model_out)
 
     def forward(self, images):
-        if not self.has_weights:
-            raise ValueError("Network needs to be initialised before being executed")
-
         if len(images.shape) == 3:
             # single image
             images = images[None]
