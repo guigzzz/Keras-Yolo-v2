@@ -33,7 +33,7 @@ def findBestPrior(bb, priors):
 
 def processGroundTruth(bb, labels, priors, network_output_shape):
     """
-    Given bounding boxes in normal x1,y1,x2,y2 format, the relevant integer labels,
+    Given bounding boxes in normal x1,y1,x2,y2 format, the relevant labels in one-hot form,
     the anchor priors and the yolo model's output shape
     build the y_true vector to be used in yolov2 loss calculation
     """
@@ -46,12 +46,12 @@ def processGroundTruth(bb, labels, priors, network_output_shape):
         bb, np.ones((len(bb), 1)), labels
     ), axis=1)
     
-    y, x = np.split(responsible_grid_coords, 2, axis=1)
+    x, y = np.split(responsible_grid_coords, 2, axis=1)
     y = y.ravel()
     x = x.ravel()
     
     y_true = np.zeros(network_output_shape)    
-    y_true[x, y, best_anchor_indices] = values
+    y_true[y, x, best_anchor_indices] = values
     
     return y_true
 
