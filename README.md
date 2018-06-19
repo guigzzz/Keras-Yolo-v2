@@ -73,7 +73,7 @@ trainnet.m.compile(optimizer=Adam(lr=1e-4), loss=loss, metrics=None)
 ```
 
 ### Fit model
-`bounding_boxes` is a list of `(x1, y1, x2, y2)`, while labels is a list of `int` (not one-hot).
+`bounding_boxes` is a list of `(x1, y1, x2, y2)`, while labels is a list of one-hot vectors.
 `y_true` is a numpy array of same dimensionality as the network's output, containing all the necessary information to compute the yolov2 loss.
 ```py
 from yolo_v2 import YOLOV2_ANCHOR_PRIORS as priors

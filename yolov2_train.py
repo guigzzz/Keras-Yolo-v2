@@ -3,7 +3,7 @@ import numpy as np
 
 def bbToYoloFormat(bb):
     """
-    converts (top, left, bottom, right) to
+    converts (left, top, right, bottom) to
     (center_x, center_y, center_w, center_h)
     """
     x1, y1, x2, y2 = np.split(bb, 4, axis=1) 
