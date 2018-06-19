@@ -89,7 +89,7 @@ image = imread(image_path)
 bounding_boxes, labels = fetch_bounding_boxes_and_labels()
 
 y_true = processGroundTruth(boxes, labels, priors, (13, 13, 5, 25))
-trainnet.m.fit(image[None], y_true[None, steps_per_epoch=30, epochs=10)
+trainnet.m.fit(image[None], y_true[], steps_per_epoch=30, epochs=10)
 ```
 
 # Overfitting on a single example (starting from random weights)
@@ -101,3 +101,8 @@ Ground Truth                  |  After a couple steps     | After more steps
 
 
 Seems like we can overfit quite well! (the bounding boxes on the right-most image are in fact different to the ones in the left-most image)
+
+# Documentation:
+
+- [Yolo v1](https://arxiv.org/pdf/1506.02640.pdf)
+- [Yolo v2 / 9000](https://arxiv.org/pdf/1612.08242.pdf)
