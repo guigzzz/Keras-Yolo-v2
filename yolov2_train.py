@@ -1,4 +1,59 @@
 import tensorflow as tf
+import numpy as np
+
+def bbToYoloFormat(bb):
+    """
+    converts (top, left, bottom, right) to
+    (center_x, center_y, center_w, center_h)
+    """
+    x1, y1, x2, y2 = np.split(bb, 4, axis=1) 
+    w = x2 - x1
+    h = y2 - y1
+    c_x = x1 + w / 2
+    c_y = y1 + h / 2
+    
+    return np.concatenate([c_x, c_y, w, h], axis=-1)
+
+def findBestPrior(bb, priors):
+    """
+    Given bounding boxes in yolo format and anchor priors
+    compute the best anchor prior for each bounding box
+    """
+    w1, h1 = bb[:, 2], bb[:, 3]
+    w2, h2 = priors[:, 0], priors[:, 1]
+    
+    # overlap, assumes top left corner of both at (0, 0)
+    horizontal_overlap = np.minimum(w1[:, None], w2)
+    vertical_overlap = np.minimum(h1[:, None], h2)
+    
+    intersection = horizontal_overlap * vertical_overlap
+    union = (w1 * h1)[:, None] + (w2 * h2) - intersection
+    iou = intersection / union
+    return np.argmax(iou, axis=1)
+
+def processGroundTruth(bb, labels, priors, network_output_shape):
+    """
+    Given bounding boxes in normal x1,y1,x2,y2 format, the relevant integer labels,
+    the anchor priors and the yolo model's output shape
+    build the y_true vector to be used in yolov2 loss calculation
+    """
+    bb = bbToYoloFormat(bb) / 32
+    best_anchor_indices = findBestPrior(bb, priors)
+    
+    responsible_grid_coords = np.floor(bb).astype(np.uint32)[:, :2]
+    
+    values = np.concatenate((
+        bb, np.ones((len(bb), 1)), labels
+    ), axis=1)
+    
+    y, x = np.split(responsible_grid_coords, 2, axis=1)
+    y = y.ravel()
+    x = x.ravel()
+    
+    y_true = np.zeros(network_output_shape)    
+    y_true[x, y, best_anchor_indices] = values
+    
+    return y_true
 
 class YoloLossKeras:
     def __init__(self, priors, B=5, n_classes=20):
@@ -66,7 +121,8 @@ class YoloLossKeras:
         obj_diff = tf.square(iou_scores - predicted_objectedness) * responsibility_selector
         obj_loss = tf.reduce_sum(obj_diff, axis=[1, 2, 3])
 
-        no_obj_diff = tf.square(0 - predicted_objectedness) * (1 - responsibility_selector)
+        best_iou = tf.reduce_max(iou_scores, axis=-1)
+        no_obj_diff = tf.square(0 - predicted_objectedness) * tf.to_float(best_iou < 0.6)[..., None] * (1 - responsibility_selector)
         no_obj_loss = tf.reduce_sum(no_obj_diff, axis=[1, 2, 3])
 
         clf_diff = tf.square(true_logits - predicted_logits) * responsibility_selector[..., None]
