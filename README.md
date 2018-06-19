@@ -14,7 +14,10 @@ from tiny_yolo_v2 import TinyYOLOv2
 # or from yolo_v2 import YOLOv2
 
 IM_SIZE = 13*32
-net = TinyYOLOv2(IM_SIZE)
+B = 5
+n_classes = 20
+
+net = TinyYOLOv2(IM_SIZE, B, n_classes)
 net.loadWeightsFromDarknet(tiny_yolo_darknet_weight_file)
 ```
 ## Inference:
@@ -41,7 +44,10 @@ from tiny_yolo_v2 import TinyYOLOv2
 # or from yolo_v2 import YOLOv2
 
 IM_SIZE = 13*32
-net = TinyYOLOv2(IM_SIZE)
+B = 5
+n_classes = 20
+
+net = TinyYOLOv2(IM_SIZE, B, n_classes)
 net.loadWeightsFromKeras(tiny_yolo_keras_weight_file)
 ```
 
@@ -59,7 +65,7 @@ Ground Truth                         |  After a couple steps
 ```py
 from tiny_yolo_v2 import TinyYOLOv2
 
-trainnet = TinyYOLOv2(13 * 32, is_learning_phase=True)
+trainnet = TinyYOLOv2(13 * 32, 5, 20, is_learning_phase=True)
 ```
 
 ### Create custom yolov2 loss and compile the underlying keras model
@@ -68,7 +74,7 @@ from tiny_yolo_v2 import TINY_YOLOV2_ANCHOR_PRIORS as priors
 from keras.optimizers import Adam
 from yolov2_train import YoloLossKeras
 
-loss = YoloLossKeras(priors, B=5, n_classes=20).loss
+loss = YoloLossKeras(priors).loss
 trainnet.m.compile(optimizer=Adam(lr=1e-4), loss=loss, metrics=None)
 ```
 
@@ -82,8 +88,8 @@ from yolov2_train import processGroundTruth
 image = imread(image_path)
 bounding_boxes, labels = fetch_bounding_boxes_and_labels()
 
-y_true = processGroundTruth(boxes, labels, priors, (13, 13, 5, 25)).reshape(1, 13, 13, 5 * 25)
-trainnet.m.fit(image, y_true, steps_per_epoch=30, epochs=10)
+y_true = processGroundTruth(boxes, labels, priors, (13, 13, 5, 25))
+trainnet.m.fit(image[None], y_true[None, steps_per_epoch=30, epochs=10)
 ```
 
 # Overfitting on a single example (starting from random weights)

@@ -1,4 +1,4 @@
-from keras.layers import Conv2D, MaxPooling2D, Input, Concatenate
+from keras.layers import Conv2D, MaxPooling2D, Input, Concatenate, Reshape
 from keras import backend as K
 from keras import Model
 import numpy as np
@@ -12,11 +12,15 @@ YOLOV2_ANCHOR_PRIORS = np.array([
 ]).reshape(5, 2)
 
 class YOLOv2:
-    def __init__(self, image_size, is_learning_phase=False):
+    def __init__(self, image_size, B, n_classes, is_learning_phase=False):
         K.set_learning_phase(int(is_learning_phase))
         K.reset_uids()
 
         self.image_size = image_size
+        self.n_cells = self.image_size // 32
+        self.B = B
+        self.n_classes = n_classes
+
         self.m = self.buildModel()
 
     def loadWeightsFromDarknet(self, file_path):
@@ -58,7 +62,11 @@ class YOLOv2:
         model = Concatenate()([reorg(convskip, 2), model])
         
         model = conv_batch_lrelu(model, 1024, 3)
-        model_out = Conv2D(125, (1, 1), padding='same', activation='linear')(model)
+        model = Conv2D(125, (1, 1), padding='same', activation='linear')(model)
+
+        model_out = Reshape(
+            [self.n_cells, self.n_cells, self.B, 4 + 1 + self.n_classes]
+            )(model)
 
         return Model(inputs=model_in, outputs=model_out)
 
@@ -67,8 +75,7 @@ class YOLOv2:
             # single image
             images = images[None]
 
-        output = self.m.predict(images).reshape(
-            -1, self.image_size // 32, self.image_size // 32, 5, 25)
+        output = self.m.predict(images)
 
         return yoloPostProcess(output, YOLOV2_ANCHOR_PRIORS)
 

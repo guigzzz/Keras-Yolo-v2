@@ -56,16 +56,14 @@ def processGroundTruth(bb, labels, priors, network_output_shape):
     return y_true
 
 class YoloLossKeras:
-    def __init__(self, priors, B=5, n_classes=20):
+    def __init__(self, priors):
         self.priors = priors
-        self.B = B
-        self.n_classes = n_classes
 
     def loss(self, y_true, y_pred):
 
         n_cells = y_pred.get_shape().as_list()[1]
-        y_pred = tf.reshape(y_pred, [-1, n_cells, n_cells, self.B, 4 + 1 + self.n_classes], name='y_pred')
         y_true = tf.reshape(y_true, tf.shape(y_pred), name='y_true')
+        y_pred = tf.identity(y_pred, name='y_pred')
 
         #### PROCESS PREDICTIONS ####
         # get x-y coords (for now they are with respect to cell)
@@ -81,7 +79,7 @@ class YoloLossKeras:
         # compute bb width and height
         predicted_wh = self.priors * tf.exp(y_pred[..., 2:4])
 
-        # compute coords for 
+        # compute predicted bb center and width
         predicted_min = predicted_xy - predicted_wh / 2
         predicted_max = predicted_xy + predicted_wh / 2
 
@@ -136,8 +134,6 @@ class YoloLossKeras:
         loss = object_coord_scale * (xy_loss + wh_loss) + \
                 object_conf_scale * obj_loss + noobject_conf_scale * no_obj_loss + \
                 object_class_scale * clf_loss
-
-        # loss = tf.Print(loss, [xy_loss, wh_loss, obj_loss, no_obj_loss, clf_loss])
         return loss 
         
 
