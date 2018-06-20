@@ -1,8 +1,9 @@
 INRIAPerson
 .vscode
-yolov2-tiny-voc.weights
 *.pyc
 *-checkpoint.*
 set*
 *_model
 *.weights
+*.pk
+*.ipynb
