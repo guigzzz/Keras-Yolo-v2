@@ -14,7 +14,10 @@ net = YOLOv2(IM_SIZE, 5, 20)
 net.loadWeightsFromKeras('yolov2_keras_model')
 
 webcam = cv2.VideoCapture(0)
-webcam.read()
+
+disp_height, disp_width = webcam.read()[1].shape[:2]
+height_scale = disp_height / IM_SIZE
+width_scale = disp_width / IM_SIZE
 
 n_frame = 1
 buffer_size = 30
@@ -29,12 +32,17 @@ while True:
         t = time()
         
         ok, frame = webcam.read()
-        frame = imresize(frame, (IM_SIZE, IM_SIZE)) / 255
-        r = net.forward(frame)[0]
+        net_frame = imresize(frame, (IM_SIZE, IM_SIZE)) / 255
+        boxes, labels = net.forward(net_frame)[0]
 
-        if len(r) > 0:
-            boxes, labels = r
+        if len(boxes) > 0:
             for (left, top, right, bottom), label in zip(boxes, labels):
+
+                left = int(left * width_scale)
+                top = int(top * height_scale)
+                right = int(right * width_scale)
+                bottom = int(bottom * height_scale)
+
                 cv2.rectangle(frame, (left, top), (right, bottom), color=(255, 0, 0), thickness=3)
                 cv2.putText(
                     frame, classes[label], (left, top-10), 
@@ -47,7 +55,6 @@ while True:
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0)
             )
         
-
         cv2.imshow('frame', frame)
         cv2.waitKey(1)
 
