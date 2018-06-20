@@ -53,7 +53,7 @@ net.loadWeightsFromKeras(tiny_yolo_keras_weight_file)
 
 # Example:
 
-Ground Truth                         |  After a couple steps
+Ground Truth                         |  Detected Objects
 :-----------------------------------:|:-------------------------:
 ![](images/example_ground_truth.JPG) | ![](images/example_detection.JPG)
 
@@ -89,7 +89,7 @@ image = imread(image_path)
 bounding_boxes, labels = fetch_bounding_boxes_and_labels()
 
 y_true = processGroundTruth(boxes, labels, priors, (13, 13, 5, 25))
-trainnet.m.fit(image[None], y_true[], steps_per_epoch=30, epochs=10)
+trainnet.m.fit(image[None], y_true[None], steps_per_epoch=30, epochs=10)
 ```
 
 # Overfitting on a single example (starting from random weights)
