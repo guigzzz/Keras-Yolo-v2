@@ -10,7 +10,7 @@ IM_SIZE = 416
 # net = TinyYOLOv2(IM_SIZE)
 # net.loadWeightsFromKeras('yolov2_tiny_keras_model')
 
-net = YOLOv2(IM_SIZE)
+net = YOLOv2(IM_SIZE, 5, 20)
 net.loadWeightsFromKeras('yolov2_keras_model')
 
 webcam = cv2.VideoCapture(0)
@@ -19,6 +19,10 @@ webcam.read()
 n_frame = 1
 buffer_size = 30
 frame_time_buffer = np.zeros(buffer_size)
+
+classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 
+    'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 
+    'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
 
 while True:
     try:
@@ -29,16 +33,20 @@ while True:
         r = net.forward(frame)[0]
 
         if len(r) > 0:
-            boxes, _ = r
-            for left, top, right, bottom in boxes:
+            boxes, labels = r
+            for (left, top, right, bottom), label in zip(boxes, labels):
                 cv2.rectangle(frame, (left, top), (right, bottom), color=(255, 0, 0), thickness=3)
-
+                cv2.putText(
+                    frame, classes[label], (left, top-10), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0)
+                )
 
         frame_time_buffer[n_frame % buffer_size] = time() - t
         cv2.putText(
             frame, 'fps: {:.2f}'.format(buffer_size / np.sum(frame_time_buffer)), (0, 15), 
             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0)
             )
+        
 
         cv2.imshow('frame', frame)
         cv2.waitKey(1)
