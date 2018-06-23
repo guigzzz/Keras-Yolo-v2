@@ -14,10 +14,11 @@ def reorg(input_tensor, stride):
     channel_last = Permute((2, 3, 1))(target_tensor)
     return Reshape((h // stride, w // stride, -1))(channel_last)
 
-def conv_batch_lrelu(input_tensor, numfilter, dim):
-    input_tensor = Conv2D(numfilter, (dim, dim), padding='same',
+def conv_batch_lrelu(input_tensor, numfilter, dim, strides=1):
+    input_tensor = Conv2D(numfilter, (dim, dim), strides=strides, padding='same',
                         kernel_regularizer=regularizers.l2(0.0005),
-                        kernel_initializer=initializers.TruncatedNormal(stddev=0.1)
+                        kernel_initializer=initializers.TruncatedNormal(stddev=0.1),
+                        use_bias=False
                     )(input_tensor)
     input_tensor = BatchNormalization()(input_tensor)
     return LeakyReLU(alpha=0.1)(input_tensor)

@@ -25,19 +25,21 @@ def load_bn_weights(layer, data, index):
     
     return index
 
-def load_conv_weights(layer, data, index, use_bias):
-    conv_weight_shapes = [w.shape for w in layer.get_weights()]
-    kernel_shape, bias_shape = conv_weight_shapes
+
+def load_conv_weights(layer, data, index):
+    conv_layer_weights = []
+
+    if layer.use_bias:
+        kernel_shape, bias_shape = [w.shape for w in layer.get_weights()]
     
-    if use_bias:
         num_bias_weights = np.prod(bias_shape)
         bias_weights = data[index : index + num_bias_weights].reshape(bias_shape)
         index += num_bias_weights
+
+        conv_layer_weights = [bias_weights]
+
     else:
-        # yolov2 has biases set to zero
-        # the batchnorm betas (offsets) play the same role
-        num_bias_weights = np.prod(bias_shape)
-        bias_weights = np.zeros(bias_shape) 
+        kernel_shape = layer.get_weights()[0].shape
 
     num_kernel_weights = np.prod(kernel_shape)
     kernel_weights = data[index : index + num_kernel_weights].reshape(kernel_shape)
@@ -50,11 +52,10 @@ def load_conv_weights(layer, data, index, use_bias):
     kernel_weights = np.transpose(kernel_weights, [2, 3, 1, 0])
     index += num_kernel_weights
 
-    conv_layer_weights = [kernel_weights, bias_weights]
+    conv_layer_weights = [kernel_weights] + conv_layer_weights
     layer.set_weights(conv_layer_weights)
     
     return index
-
 
 def getLayerInfo(layer):
     splits = layer.name.split('_')
@@ -86,8 +87,11 @@ def load_weights(model, yolo_weight_file):
     print('Loading weights from {}'.format(yolo_weight_file))
     data = np.fromfile(yolo_weight_file, np.float32)
 
+
+    print('got {} values'.format(len(data)))
+
     layer_dict = {}
-    for l in model.layers[:-1]:
+    for l in model.layers:
         ltype, ind = getLayerInfo(l)
         
         if ind in layer_dict:
@@ -98,14 +102,14 @@ def load_weights(model, yolo_weight_file):
 
 
     for i in sorted(layer_dict.keys()):
-        # retrieve bn layer weights
-        index = load_bn_weights(layer_dict[i]['batch_normalization'], data, index)
+        print(i, layer_dict[i], index)
+
+        if 'batch_normalization' in layer_dict[i]:
+            # retrieve bn layer weights
+            index = load_bn_weights(layer_dict[i]['batch_normalization'], data, index)
         
         # retrieve conv layer weights
-        index = load_conv_weights(layer_dict[i]['conv2d'], data, index, use_bias=False)
-
-    # Final layer has no batchnorm, hence need to restore bias weights as well
-    index = load_conv_weights(model.layers[-1], data, index, use_bias=True)
+        index = load_conv_weights(layer_dict[i]['conv2d'], data, index)
 
     # make sure that we have consumed all weights in data file
     err = 'Not all weights consumed, used: {}, expected: {}, diff: {}'\

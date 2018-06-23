@@ -57,9 +57,7 @@ def non_max_suppression(boxes, labels, overlapThresh):
     # integer data type
     return boxes[pick], labels[pick]
 
-CELL_SIZE = 32
-
-def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
+def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold, cell_size):
     pw, ph = anchors[:, 0], anchors[:, 1]
     cell_inds = np.arange(clf.shape[1])
 
@@ -86,17 +84,17 @@ def getBoundingBoxesFromNetOutput(clf, anchors, confidence_threshold):
 
     boxes = np.stack((
         left, top, right, bottom
-    ), axis=-1) * CELL_SIZE
+    ), axis=-1) * cell_size
     
     final_confidence = class_confidences * object_confidences
     boxes = boxes[final_confidence > confidence_threshold].reshape(-1, 4).astype(np.int32)
     labels = predicted_labels[final_confidence > confidence_threshold]
     return boxes, labels
 
-def yoloPostProcess(yolo_output, priors, maxsuppression=True, maxsuppressionthresh=0.5, classthresh=0.6):
+def yoloPostProcess(yolo_output, priors, maxsuppression=True, maxsuppressionthresh=0.5, classthresh=0.6, cell_size=32):
     allboxes = []
     for o in yolo_output:
-        boxes, labels = getBoundingBoxesFromNetOutput(o, priors, confidence_threshold=classthresh)
+        boxes, labels = getBoundingBoxesFromNetOutput(o, priors, confidence_threshold=classthresh, cell_size=cell_size)
         if maxsuppression and len(boxes) > 0:
             boxes, labels = non_max_suppression(boxes, labels, maxsuppressionthresh)
         allboxes.append((boxes, labels))
