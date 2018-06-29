@@ -127,6 +127,21 @@ net = YOLOv3(13 * 32, 9, 80)
 net.loadWeightsFromKeras('yolov3_keras_model')
 ```
 
+- Finally, an inference example (`forward` works the same as in v2):
+
+```py
+image = imresize(
+    imread(image_path), 
+    (13 * 32, 13 * 32)
+) / 255
+
+boxes, labels = net.forward(image)[0]
+```
+
+- With the following output:
+
+![](images/yolo_v3_example.JPG)
+
 Limitations:
 - This implementation of Yolov3 is not pure Keras as it relies on using `tf.resize_images` with `align_corners=True`, hence the standard Keras `UpSampling2D` layer cannot be used.
 
