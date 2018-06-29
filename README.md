@@ -138,9 +138,23 @@ image = imresize(
 boxes, labels = net.forward(image)[0]
 ```
 
-- With the following output:
+- Using the following code:
 
-![](images/yolo_v3_example.JPG)
+```py
+import matplotlib.pyplot as plt
+from visualisation import annotate_image, coco_classes
+
+ann = annotate_image(image, boxes, labels, coco_classes)
+
+plt.figure(figsize=(10, 10))
+plt.imshow(ann)
+plt.axis('off')
+plt.show()
+```
+
+- We get the following image:
+
+![](images/yolo_v3_example.png)
 
 Limitations:
 - This implementation of Yolov3 is not pure Keras as it relies on using `tf.resize_images` with `align_corners=True`, hence the standard Keras `UpSampling2D` layer cannot be used.
