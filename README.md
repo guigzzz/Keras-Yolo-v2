@@ -102,7 +102,43 @@ Ground Truth                  |  After a couple steps     | After more steps
 
 Seems like we can overfit quite well! (the bounding boxes on the right-most image are in fact different to the ones in the left-most image)
 
+# Yolov3
+
+This repository also contains an implementation of Yolov3. The architecture has multiple outputs and hence the existing weight loading code does not work as it relies on the (poor) assumption that the keras layers are ordered in a certain way. I have worked around this by implementing darknet config parsing in `cfgparser.load_from_darknet_cfg`. Note that this config parsing has for now only been tested to be working on Yolov3. A static implementation of Yolov3 can also be found in `yolo_v3.py`. The following steps show how to use all of this:
+
+- The following code will simultaneously parse and read the darknet config and weight files, where `m` is a standard keras model:
+
+```py
+from cfgparser import load_from_darknet_cfg
+
+cfg_path = 'yolov3.cfg'
+weight_file = 'yolov3.weights'
+
+m = load_from_darknet_cfg(cfg_path, weight_file=weight_file)
+m.save('yolov3_keras_model')
+```
+
+- The static implementation of Yolov3 found in `yolo_v3.py` can be used alongside the previously saved keras weights:
+
+```py
+from yolo_v3 import YOLOv3
+
+net = YOLOv3(13 * 32, 9, 80)
+net.loadWeightsFromKeras('yolov3_keras_model')
+```
+
+Limitations:
+- This implementation of Yolov3 is not pure Keras as it relies on using `tf.resize_images` with `align_corners=True`, hence the standard Keras `UpSampling2D` layer cannot be used.
+
+# Todo:
+- [ ] Adapt loss function to work with the multiple outputs of Yolov3
+- [ ] unify data loading between the different yolo versions
+- [ ] stop ignoring the hyperparameters present in the config
+- [ ] Implement the necessary infrastructure to use models pretrained on ImageNet
+
+
 # Documentation:
 
 - [Yolo v1](https://arxiv.org/pdf/1506.02640.pdf)
 - [Yolo v2 / 9000](https://arxiv.org/pdf/1612.08242.pdf)
+- [Yolo v3](https://pjreddie.com/media/files/papers/YOLOv3.pdf)

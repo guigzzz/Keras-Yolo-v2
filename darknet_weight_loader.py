@@ -102,8 +102,6 @@ def load_weights(model, yolo_weight_file):
 
 
     for i in sorted(layer_dict.keys()):
-        print(i, layer_dict[i], index)
-
         if 'batch_normalization' in layer_dict[i]:
             # retrieve bn layer weights
             index = load_bn_weights(layer_dict[i]['batch_normalization'], data, index)
