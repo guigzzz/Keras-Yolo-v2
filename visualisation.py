@@ -23,7 +23,7 @@ coco_classes = ['person', 'bicycle', 'car', 'motorcycle', 'airplane',
 
 
 def annotate_image(image, boxes, labels, class_names):
-    image = (image.copy() * 255).astype(np.uint8)
+    image = image.copy()
 
     for (left, top, right, bottom), label in zip(boxes, labels):
         cv2.rectangle(image, (left, top), 
@@ -34,5 +34,21 @@ def annotate_image(image, boxes, labels, class_names):
         )
 
     return image
+
+
+def resize_bounding_boxes(boxes, old_size, new_size):
+    boxes = np.array(boxes, dtype=np.float32)
+    print(old_size, new_size)
+    
+    o_h, o_w = old_size
+    n_h, n_w = new_size
+    
+    h_factor = o_h / n_h
+    w_factor = o_w / n_w
+    
+    f = np.array([w_factor, h_factor, w_factor, h_factor])
+    boxes *= f[None]
+    
+    return boxes.astype(np.int32)
 
 
