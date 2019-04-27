@@ -62,7 +62,9 @@ class YOLOv2:
         model = Concatenate()([reorg(convskip, 2), model])
         
         model = conv_batch_lrelu(model, 1024, 3)
-        model = Conv2D(125, (1, 1), padding='same', activation='linear')(model)
+
+        n_outputs = len(YOLOV2_ANCHOR_PRIORS) * (5 + self.n_classes)
+        model = Conv2D(n_outputs, (1, 1), padding='same', activation='linear')(model)
 
         model_out = Reshape(
             [self.n_cells, self.n_cells, self.B, 4 + 1 + self.n_classes]

@@ -52,7 +52,6 @@ class YOLOv3:
         model = NetworkInNetwork(model, [(512, 1), (1024, 3), (512, 1), (1024, 3), (512, 1)])
         out1 = conv_batch_lrelu(model, 1024, 3)
         out1 = Conv2D(self.outs_per_cell // 3, 1)(out1)
-        # out1 = Reshape([self.n_cells, self.n_cells, self.B // 3, 4 + 1 + self.n_classes])(out1)
 
         model = conv_batch_lrelu(model, 256, 1)
         model = Upsample(2)(model)
@@ -61,7 +60,6 @@ class YOLOv3:
         model = NetworkInNetwork(model, [(256, 1), (512, 3), (256, 1), (512, 3), (256, 1)])
         out2 = conv_batch_lrelu(model, 512, 3)
         out2 = Conv2D(self.outs_per_cell // 3, 1)(out2)
-        # out2 = Reshape([2 * self.n_cells, 2 * self.n_cells, self.B // 3, 4 + 1 + self.n_classes])(out2)
 
         model = conv_batch_lrelu(model, 128, 1)
         model = Upsample(2)(model)
@@ -70,7 +68,6 @@ class YOLOv3:
         model = NetworkInNetwork(model, [(128, 1), (256, 3), (128, 1), (256, 3), (128, 1)])
         out3 = conv_batch_lrelu(model, 256, 3)
         out3 = Conv2D(self.outs_per_cell // 3, 1)(out3)
-        # out3 = Reshape([4 * self.n_cells, 4 * self.n_cells, self.B // 3, 4 + 1 + self.n_classes])(out3)
 
         return Model(inputs=model_in, outputs=[out1, out2, out3])
 
